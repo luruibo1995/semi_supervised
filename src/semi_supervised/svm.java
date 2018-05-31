@@ -134,11 +134,11 @@ abstract class QMatrix {
 };
 
 abstract class Kernel extends QMatrix {
-	private svm_node[][] x;
-	private final double[] x_square;
+	public svm_node[][] x;
+	public  double[] x_square;
 
 	// svm_parameter
-	private final int kernel_type;
+	public final int kernel_type;
 	private final int degree;
 	private final double gamma;
 	private final double coef0;
@@ -1151,10 +1151,18 @@ class SVC_Q extends Kernel
 	private final Cache cache;
 	private final double[] QD;
 
-	SVC_Q(svm_problem prob, svm_parameter param, byte[] y_)
+	SVC_Q(semi_problem prob, svm_parameter param, byte[] y_)
 	{
 		super(prob.l, prob.x, param);
 		y = (byte[])y_.clone();
+		if(kernel_type == svm_parameter.RBF)
+		{
+			x_square = new double[prob.getallNode()];
+			for(int i=0;i<prob.getallNode();i++)
+				x_square[i] = dot(x[i],x[i]);
+		}
+		else x_square = null;
+	
 		cache = new Cache(prob.l,(long)(param.cache_size*(1<<20)));
 		QD = new double[prob.l];
 		for(int i=0;i<prob.l;i++)
@@ -1312,7 +1320,7 @@ public class svm {
 		svm_print_string.print(s);
 	}
 
-	private static void solve_c_svc(svm_problem prob, svm_parameter param,
+	private static void solve_c_svc(semi_problem prob, svm_parameter param,
 					double[] alpha, Solver.SolutionInfo si,
 					double Cp, double Cn)
 	{
@@ -1380,7 +1388,7 @@ public class svm {
 			zeros[i] = 0;
 
 		Solver_NU s = new Solver_NU();
-		s.Solve(l, new SVC_Q(prob,param,y), zeros, y,
+		s.Solve(l, new SVC_Q((semi_problem)prob,param,y), zeros, y,
 			alpha, 1.0, 1.0, param.eps, si, param.shrinking);
 		double r = si.r;
 
@@ -1507,7 +1515,7 @@ public class svm {
 		switch(param.svm_type)
 		{
 			case svm_parameter.C_SVC:
-				solve_c_svc(prob,param,alpha,si,Cp,Cn);
+				solve_c_svc((semi_problem)prob,param,alpha,si,Cp,Cn);
 				break;
 			case svm_parameter.NU_SVC:
 				solve_nu_svc(prob,param,alpha,si);
