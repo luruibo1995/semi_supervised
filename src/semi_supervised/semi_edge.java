@@ -39,10 +39,17 @@ public class semi_edge {
 				doubleEdgeNodesList.add(new semi_edge_double_node(row,edgeNodeDict[row][col].index));
 			}		
 		}		
-		 HashSet<semi_edge_double_node> h = new HashSet<semi_edge_double_node>(doubleEdgeNodesList);   
+		 HashSet<semi_edge_double_node> h = new HashSet<semi_edge_double_node>(doubleEdgeNodesList); 
+//		 for (semi_edge_double_node node : h) {
+//			for (semi_edge_double_node node2 : h) {
+//				if (node.forehead == node2.backhead && node.backhead == node2.forehead) {
+//					System.out.println(""+node.forehead + ""+node.backhead);
+//				}
+//			}
+//		}
 		 doubleEdgeNodesList.clear();   
 		 doubleEdgeNodesList.addAll(h); 
-//		 System.out.println(doubleEdgeNodesList.size());
+		 System.out.println("doubleEdgeNodeList.size():"+doubleEdgeNodesList.size());
 		 semi_prob.setE(doubleEdgeNodesList.size());
 	}
 	

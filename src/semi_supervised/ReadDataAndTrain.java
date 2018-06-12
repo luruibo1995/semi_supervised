@@ -44,10 +44,14 @@ public class ReadDataAndTrain {
 		model = semiSupervisedTrain.train();
 		List<Double> doubleList = new ArrayList<Double>();
 		for (int i = prob.l ; i < prob.x.length ; i++ )
-			doubleList.add(SemiSupervisedPredict.semi_predict(model, prob.x[i], semiSupervisedTrain.RestrictMatrix, semiSupervisedTrain.doubleEdgeNodeList, 
+			doubleList.add(SemiSupervisedPredict.semi_predict(model, prob.x[i], semiSupervisedTrain.doubleEdgeNodeList, 
 					semiSupervisedTrain.alphaRestrict, semiSupervisedTrain.alphaBoundless, prob));
-		
+//		svm_node[] svmPredictNode = new svm_node[] {
+//				new svm_node(1,-1.20755205308) , new svm_node(2, 0.223784126706), new svm_node(3, -0.875596245277), new svm_node(4, -1.03824799273)
+//		};
+//		-2 1:-1.20755205308 2:0.223784126706 3:-0.875596245277 4:-1.03824799273 
 		System.out.println(doubleList);
+//		System.out.println(SemiSupervisedPredict.semi_predict(model, svmPredictNode, semiSupervisedTrain.doubleEdgeNodeList, semiSupervisedTrain.alphaRestrict, semiSupervisedTrain.alphaBoundless, prob));
 		
 	}
 	
@@ -57,14 +61,14 @@ public class ReadDataAndTrain {
 		param.svm_type = svm_parameter.C_SVC;
 		param.kernel_type = svm_parameter.RBF;
 		param.degree = 3;
-		param.gamma = 0;	// 1/num_features
+		param.gamma = 10;	// 1/num_features
 		param.coef0 = 0;
 		param.nu = 0.5;
 		param.cache_size = 5;
-		param.C = 1;
+		param.C = 30;
 		param.eps = 1e-3;
 		param.p = 0.1;
-		param.shrinking = 1;
+		param.shrinking = 1; //½øÐÐshringking
 		param.probability = 0;
 		param.nr_weight = 0;
 		param.weight_label = new int[0];
@@ -129,6 +133,7 @@ public class ReadDataAndTrain {
 
 		if(param.gamma == 0 && max_index > 0)
 			param.gamma = 1.0/max_index;
+//			param.gamma = 2.0;
 
 
 		fp.close();

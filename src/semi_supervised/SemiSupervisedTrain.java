@@ -33,7 +33,7 @@ public class SemiSupervisedTrain {
 		this.startSolving();
 		double[] alphaRestrict_ = this.alphaRestrict.clone();
 		for (int i = 0; i < alphaRestrict_.length ; i++) {
-			if (alphaRestrict_[i] < this.param.C && alphaRestrict_[i] > 0) {
+			if (Math.abs(alphaRestrict_[i]) > 0 ) {
 				this.supportVec = this.prob.x[i];
 				break;
 			}
@@ -65,7 +65,7 @@ public class SemiSupervisedTrain {
 		}
 		model.oneSupportSV = supportVec;
 		model.l = nSv;
-		System.out.println(nSv);
+//		System.out.println(nSv);
 		model.E = this.E;
 		model.SV = new svm_node[nSv][];
 		int j = 0;
@@ -89,8 +89,8 @@ public class SemiSupervisedTrain {
 			System.out.println("linear equatation error");
 		}
 		finally {
-			System.out.println(Arrays.toString(alphaRestrict));
-			System.out.println(Arrays.toString(alphaBoundless));
+//			System.out.println(Arrays.toString(alphaRestrict));
+//			System.out.println(Arrays.toString(alphaBoundless));
 		}
 		
 		
@@ -114,32 +114,33 @@ public class SemiSupervisedTrain {
 	}
 	
 
-	private double[][] getCoefficient(SVC_Q RestrictMatrix, List<semi_edge_double_node> doubleEdgeNodeList , semi_edge_node[][] edgeNodeDict) {
-		double[][] coefficient = new double[E][E];
-		double tmp = 0;
-		for (int i = 0; i < coefficient.length; i++) {
-			int iforeNode = doubleEdgeNodeList.get(i).forehead;
-			int ibackNode = doubleEdgeNodeList.get(i).backhead;
-			for (int j = 0; j < coefficient[i].length; j++) {
-				int jforeNode = doubleEdgeNodeList.get(j).forehead;
-				int jbackNode = doubleEdgeNodeList.get(j).backhead;
-				coefficient[i][j] = RestrictMatrix.kernel_function(iforeNode, jforeNode) - RestrictMatrix.kernel_function(iforeNode, jbackNode)
-						-RestrictMatrix.kernel_function(ibackNode, jforeNode) + RestrictMatrix.kernel_function(ibackNode, jbackNode);
-//				System.out.println("+++++++++++++++++:"+coefficient[i][j]);
-				if (i == j) {
-					tmp = returnEij(iforeNode, ibackNode, edgeNodeDict);
-					if (tmp == 0) {
-						System.out.println("Not found Node!");
-					}
-					coefficient[i][j] += 0.25 / tmp; 
-					
-				}
-				System.out.println(coefficient[i][j]);
-			}
-		}
-		return coefficient;
-	}
 	
+	private double[][] getCoefficient(SVC_Q RestrictMatrix, List<semi_edge_double_node> doubleEdgeNodeList , semi_edge_node[][] edgeNodeDict) {
+			double[][] coefficient = new double[E][E];
+			double tmp = 0;
+			for (int i = 0; i < coefficient.length; i++) {
+				int iforeNode = doubleEdgeNodeList.get(i).forehead;
+				int ibackNode = doubleEdgeNodeList.get(i).backhead;
+				for (int j = 0; j < coefficient[i].length; j++) {
+					int jforeNode = doubleEdgeNodeList.get(j).forehead;
+					int jbackNode = doubleEdgeNodeList.get(j).backhead;
+					coefficient[i][j] = RestrictMatrix.kernel_function(iforeNode, jforeNode) - RestrictMatrix.kernel_function(iforeNode, jbackNode)
+							-RestrictMatrix.kernel_function(ibackNode, jforeNode) + RestrictMatrix.kernel_function(ibackNode, jbackNode);
+	//				System.out.println("+++++++++++++++++:"+coefficient[i][j]);
+					if (i == j) {
+						tmp = returnEij(iforeNode, ibackNode, edgeNodeDict);
+						if (tmp == 0) {
+							System.out.println("Not found Node!");
+						}
+						coefficient[i][j] += 0.25 / tmp; 
+						
+					}
+	//				System.out.println(coefficient[i][j]);
+				}
+			}
+			return coefficient;
+		}
+
 	private double returnEij(int foreNode, int backNode, semi_edge_node[][] edgeNodeDict) {
 		double tmp = 0;
 		for (int x = 0; x < edgeNodeDict[foreNode].length; x++) {
@@ -169,8 +170,9 @@ public class SemiSupervisedTrain {
 			int rowforeNode = doubleEdgeNodeList.get(row).forehead;
 			int rowbackNode = doubleEdgeNodeList.get(row).backhead;
 			for (int col = 0; col < this.l; col++) {
-				value[row] -= ((RestrictMatrix.kernel_function(col, rowforeNode) - RestrictMatrix.kernel_function(col, rowbackNode)) * alphaRestrict[col]);
-				System.out.println("value:"+value[col]);
+				double littleVal = ((RestrictMatrix.kernel_function(col, rowforeNode) - RestrictMatrix.kernel_function(col, rowbackNode)) * alphaRestrict[col]);
+				value[row] -= littleVal;
+//				System.out.println("value:"+value[col]);
 			}
 		}
 		
@@ -186,6 +188,7 @@ public class SemiSupervisedTrain {
 		byte[] y = new byte[l];
 		Random rand = new Random();
 		int i;
+		double mSum = 0;
 //		int n = (int) (param.nu * prob.l);
 //		for (i = 0; i < n; i++) {
 //			alpha[i] = 1;
@@ -202,11 +205,29 @@ public class SemiSupervisedTrain {
 			else
 				y[i] = -1;
 			p_restrict[i] = -y[i];
-			alpha[i] = rand.nextDouble() * Cp;
-//			alpha[i] = 1.0;
+//			alpha[i] = 1;
+//		}
+//		alpha[39] = 0;
+		
+			if (i < l / 2) {
+				alpha[i] = rand.nextDouble() * Cp;
+			} else {
+				alpha[i] = rand.nextDouble()* 0.5 * Cp;
+			}
+
+////			alpha[i] = 1.0;
+////			alpha[i] = 1.0;
+			mSum += alpha[i] * y[i];
 		}
 		
-		
+		for ( i = 0; i < l; i++) {
+			alpha[i] /= mSum;
+		}
+		double sum = 0;
+		for (int j = 0; j < l; j++) {
+			sum += y[j] * alpha[j];
+		}
+		System.out.println(sum);
 		SolutionInfo sInfo = new SolutionInfo();
 		Solver s = new Solver();
 		s.Solve(l, new SVC_Q(prob, param, y), p_restrict, y, alpha, Cp, Cn, param.eps, sInfo, param.shrinking);
@@ -219,7 +240,7 @@ public class SemiSupervisedTrain {
 			svm.info("nu = " + sum_alpha / (Cp * prob.l) + "\n");
 
 		for (i = 0; i < l; i++) {
-//			System.out.println("alpha["+i+"]: "+alpha[i]);
+			System.out.println("alpha["+i+"]: "+alpha[i]);
 			alpha[i] *= y[i];
 	
 		}
