@@ -1,0 +1,1 @@
+生成foo_5_train.txt与foo5_text.txt，train文件中有100个normal，100个crackle与100 个wheeze，其中每类前20个都为有标记的，text文件中，20个normal，20个crackle，20个wheeze与12个noise。

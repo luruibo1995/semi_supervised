@@ -90,7 +90,7 @@ public class SemiSupervisedTrain {
 		}
 		finally {
 //			System.out.println(Arrays.toString(alphaRestrict));
-//			System.out.println(Arrays.toString(alphaBoundless));
+			System.out.println(Arrays.toString(alphaBoundless));
 		}
 		
 		
@@ -102,7 +102,7 @@ public class SemiSupervisedTrain {
 		this.l = prob.l;
 		
 		this.alphaRestrict = new double[l];
-		this.alphaBoundless =  new double[E];
+		
 		
 		this.y_fake = new byte[l];
 		this.RestrictMatrix = new SVC_Q(prob, param, y_fake);
@@ -111,6 +111,7 @@ public class SemiSupervisedTrain {
 		this.doubleEdgeNodeList = semiEdge.doubleEdgeNodesList;
 		this.edgeNodeDict = semiEdge.edgeNodeDict;
 		this.E = prob.getE();
+		this.alphaBoundless =  new double[E];
 	}
 	
 
@@ -235,7 +236,8 @@ public class SemiSupervisedTrain {
 		double sum_alpha = 0;
 		for (i = 0; i < l; i++)
 			sum_alpha += alpha[i];
-
+		
+		
 		if (Cp == Cn)
 			svm.info("nu = " + sum_alpha / (Cp * prob.l) + "\n");
 
@@ -244,6 +246,7 @@ public class SemiSupervisedTrain {
 			alpha[i] *= y[i];
 	
 		}
+		System.out.println("sumn of all a is " + sum_alpha);
 		
 	}
 	

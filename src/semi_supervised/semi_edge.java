@@ -56,7 +56,7 @@ public class semi_edge {
 	public void selectEdge(int k, semi_parameter semi_parma, semi_problem semi_prob) {
 		for (int i = 0; i < this.allNode; i++) {
 			if (y[i] != -2) {
-				for (int j = l; j < this.allNode; j++) {
+				for (int j = 0; j < this.allNode; j++) {
 					if (i != j && y[j] == -2) {
 						double e_ij = QMatrix.kernel_function(i, j);
 						map.put(e_ij, j);
